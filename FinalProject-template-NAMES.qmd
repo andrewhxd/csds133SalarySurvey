@@ -1,0 +1,54 @@
+---
+title: "Project Title"
+subtitle: "Author Names"
+format: pdf
+editor: visual
+---
+
+# Abstract
+
+In the abstract,briefly explain the motivation/background for your research, provide a core description of your approach an3025453.3026041d what you were trying to accomplish, and provide a concise summary of your results and conclusions. The abstract should contain at most 10 sentences. The sentences should be short and not convoluted throughout the report. Any person should be able to understand your abstract.
+
+# Introduction
+
+In the introduction, explain the setting for the problem you are studying. What is the scientific/social context for your problem? What are important gaps in knowledge? What are you aiming to research? Where does your data come from? What opportunities does your data offer? Once you "set the stage " for your approach, explain your approach briefly. Your description of the approach should be high-level here as well, but can be a bit more detailed as compared to the abstract (e.g., you can go into secondary key points that you were not able to include in the abstract). Finally, provide a summary of results, in terms of what new insights your research has provided. You can use itemization as you see fit (it is usually very useful to separate out the things you are trying to say explicitly, so that the reader can easily follow). Finish with your conclusions. In this section, you should refer to literature frequently to support your statements. The Introduction should be 1-1,5 page long.
+
+# Methods
+
+In the Methods section, describe in detail your data (how many features, how many samples, in what form it came, what you have done in pre-processing) and what exactly you have done for data analysis, in a way that the reader can repeat your analysis if they are provided with the data. Make sure to have a "Figure 1" that describes the overall workflow. You can use additional figures in Methods to illustrate ideas/challenges. Use formulas as needed, but make sure that all of the notation you use in the formulas is defined on time (either before the formula, or immediately after). If your math is complicated, you may consider adding a table to summarize your notation. You should make references to the literature to justify the choices you make in designing/applying your methods. The Methods Section should be 3-4 pages long.
+
+# Results
+
+Here, present your results in the form of figures and tables. In the text, explain what you have observed in an organized manner by making frequent references to figures and tables as it applies. You should always first state your observations (Results). Just state what you see. This should be 1-2 pages long but could be longer if you have more figures.
+
+# Discussion
+
+Then explain how you interpret them to reach conclusions (Discussion). In many reports/papers Results and Discussion are in separate sections. You want to be able to separate what is a result and then here weave together the "why" so how do the results and the introduction fit together. Again, you can use enumeration/itemization as needed. The Discussion section should be 1-2 pages long.
+
+# Conclusion
+
+Briefly explain the "take home messages" you have derived from your project and discuss what else can be done to build on your results. The conclusion should contain at most 10 sentences.
+
+# Roles
+
+Provide details of each team member's roles and achievements in the project
+
+# References
+
+Provide a list of the references you used to support your points throughout the report. Do not cite Wikipedia (if you used Wikipedia, find the resource cited there, make sure that it is indeed supporting your point, then cite that resource). Literature is not always to be used because they have statements that support your points, you can also be critical of the literature and/or use it to show that the state-of-the-art is not strong.
+
+Instructor's Additional Notes
+
+1.  Your report should not be any longer than 12 pages, excluding the list of references. It is ok if you need a page or 2 if you have some exceptional novel figures you are adding.
+
+2.  Your report should include at most 5 figures and tables in total. You can combine multiple figures into a single figure by using separate panels, but each figure should be coherent within itself. You must have figure captions and if you have multiple figures then you need to describe each of them and have labels for each.
+
+3.  Figure captions should have a title (in bold) followed by a clear description of how to read the figure. The purpose of the caption is to help the reader understand the figure. Your observations from the figure should not be included in the caption, they should be stated in the text.
+
+4.  Figures should be clearly visible and all material displayed in the figure should be useful to convey an idea and or to make an observation. You should not include unreadable or irrelevant figures just because they look fancy. You should include the maximum/minimum number of Figures to tell your story (no more or less).
+
+5.  You should definitely mention your figure or table in the text. It could be what it conveys or what it shows/results.
+
+6.  Label your code chuncks. You can use R, Python, or both. Your code should be integrated in this report. In the final report, I don't want to see the code in the final output, but you need to turn in the .qmd file so I can see your code. It must be commented well.
+
+7.  Use a .bib file for references. You can change the .qmd file. Check out the Quatro website for ways to improve output. You can change output to html if need be.
