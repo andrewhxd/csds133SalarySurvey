@@ -3,7 +3,6 @@ title: "Predicting Salary from Demographics and Professional Experience"
 subtitle: "Andrew, Taran, Ashley, and Krupa"
 format: pdf
 bibliography: FinalProjectReferences.bib
-csl: ieee.csl
 editor: visual
 ---
 
