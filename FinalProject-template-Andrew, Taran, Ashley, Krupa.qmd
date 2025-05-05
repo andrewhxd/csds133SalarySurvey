@@ -10,73 +10,304 @@ engine: knitr
 
 # Abstract
 
-Salaries vary greatly across countries due to multiple factors, but the key factors that influence salaries are unclear. In this project, we aim to investigate predictors of salary, including education, experience, industry, gender, and race. Using over 28,000 survey responses from AskAManager.org and data cleaning, we focused on analyzing the US, UK, and Canada for our research question: What are the key factors that influence salaries within each country, and how do these factors differ across countries? We then applied a Random Forest Classifier model to look at salary factors and to evaluate which feature was the most important. Our results showed that industry, education level, and gender are the biggest predictors of salaries. Through our exploratory data analysis, we also saw that years of experience correlates with salary. Our project suggests that education and industry matter most and don't matter with countries when determining salary levels. 
+Salaries vary greatly across countries due to multiple factors, but the key factors that influence salaries are unclear. In this project, we aim to investigate predictors of salary, including education, experience, industry, gender, and race. Using over 28,000 survey responses from AskAManager.org and data cleaning, we focused on analyzing the US, UK, and Canada for our research question: What are the key factors that influence salaries within each country, and how do these factors differ across countries? We then applied a Random Forest Classifier model to look at salary factors and to evaluate which feature was the most important. Our results showed that industry, education level, and gender are the biggest predictors of salaries. Through our exploratory data analysis, we also saw that years of experience correlates with salary. Our project suggests that education and industry matter most and don't matter with countries when determining salary levels.
 
 # Introduction
 
 Understanding key factors for high salaries is important for economic opportunities and not many studies focus on many factors; they often only focus on a single factor like gender or education. Research such as Blau and Kahn's Gender Wage Gap (2017) highlights this, but there is a gap in knowledge when it comes to multiple factors. Through this project, we aim to observe the importance of different factors and how they affect salaries. For example, is education or experience more important for a higher paying job? Salaries differ across countries, and we can explore these changes based on different factors.
 
-We used survey data from AskAManager.org, which had over 28,000 responses globally. We narrowed our focus to the US, UK, and Canada, as they dominated the number of responses in the survey (around 26,000). This dataset gave us a good opportunity to look at different demographics and professions, and also to compare between countries. Additionally, it was a great dataset to practice real-world data cleaning as it was quite messy. Our approach for data cleaning focused on normalizing currencies, experience binning, and handling missing or extra values. In our exploratory data analysis, we visualized salary distributions across key variables. Ultimately, we chose to use a Random Forest classifier because it handles mixed data well, can capture non-linear patterns and interactions between variables, which can give us feature importance, helping us identify which variables most impact salary across countries (Breiman 2001). 
+We used survey data from AskAManager.org, which had over 28,000 responses globally. We narrowed our focus to the US, UK, and Canada, as they dominated the number of responses in the survey (around 26,000). This dataset gave us a good opportunity to look at different demographics and professions, and also to compare between countries. Additionally, it was a great dataset to practice real-world data cleaning as it was quite messy. Our approach for data cleaning focused on normalizing currencies, experience binning, and handling missing or extra values. In our exploratory data analysis, we visualized salary distributions across key variables. Ultimately, we chose to use a Random Forest classifier because it handles mixed data well, can capture non-linear patterns and interactions between variables, which can give us feature importance, helping us identify which variables most impact salary across countries (Breiman 2001).
 
-Our research provided us with new insights: being in the tech industry, having a master’s degree and being a woman are the most important salary predictors according to our model. Surprisingly, the location doesn’t seem to have a big impact on the predictions of salaries. Data analysis revealed different results: the most influential factors were having a PhD, 20-30 years of experience, being male, and being in the tech industry. 
-
+Our research provided us with new insights: being in the tech industry, having a master's degree and being a woman are the most important salary predictors according to our model. Surprisingly, the location doesn't seem to have a big impact on the predictions of salaries. Data analysis revealed different results: the most influential factors were having a PhD, 20-30 years of experience, being male, and being in the tech industry.
 
 # Methods
 
-Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race.  Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1.
-![Figure 1](https://drive.google.com/file/d/1Dr7B766tN8l9gZ00ZU_TbFoM-JFCzYuy/view?usp=sharing)
+Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1. ![Figure 1](https://drive.google.com/file/d/1Dr7B766tN8l9gZ00ZU_TbFoM-JFCzYuy/view?usp=sharing)
 
 # Data Cleaning
 
-Surveys are a great method of data collection however they often suffer from issues due to free response answers and incomplete answers. These unconstrained answers and null values complicate our ability to use this data to make predictions or identify patterns in the data and thus a level of data cleaning is required before performing any further analysis on this data. 
+Surveys are a great method of data collection however they often suffer from issues due to free response answers and incomplete answers. These unconstrained answers and null values complicate our ability to use this data to make predictions or identify patterns in the data and thus a level of data cleaning is required before performing any further analysis on this data.
 
 Our first steps were to ensure consistency throughout the data where we performed several preprocessing steps aimed at ensuring standardization of values to prepare for data analysis. This started with consolidating compensation data into a single value where we combined bonuses and base pay all into one new column named total compensation. Additionally, as compensation was reported in each respondents corresponding national currency, we created a new column which was the respondents total compensation normalized into USD using current exchange rates.
 
-Next, we decided to remove extraneous columns and data automatically provided by google surveys that didn’t match the context of our analysis or provided hard to classify data. This culminated in the removal of the timestamp column, job context and job title columns. The timestamp column just provided the time the form was submitted which provided little to no discernable data in regards to the person submitting. The job context and the job title columns did provide useful information, however, the responses in these columns were often incredibly verbose and provided far too much detail in regards to the respondents job description to the point it was far easier to group professions based on the industry column rather than attempting to bucket job titles or job context responses into a feasible number of classifications. 
+Next, we decided to remove extraneous columns and data automatically provided by google surveys that didn't match the context of our analysis or provided hard to classify data. This culminated in the removal of the timestamp column, job context and job title columns. The timestamp column just provided the time the form was submitted which provided little to no discernable data in regards to the person submitting. The job context and the job title columns did provide useful information, however, the responses in these columns were often incredibly verbose and provided far too much detail in regards to the respondents job description to the point it was far easier to group professions based on the industry column rather than attempting to bucket job titles or job context responses into a feasible number of classifications.
 
 Because our dataset contained so many values, I decided it was best to just drop data points that were missing data in crucial categories such as gender, race, education level and industry. These categories were important for our analysis on demographic and occupational breakdowns. We considered using data augmentation techniques as an alternative to just dropping values however these attributes followed no structured pattern that would have allowed for common augmentation techniques. Given the size of the dataset, removing this sample of data still left with a large and robust sample that would still represent the population, allowing us to preserve data integrity.
 
-In addition to incomplete entries, we also standardized key demographic columns like gender and race. Since the survey allowed for free-form text based responses, many respondents answered “man”, “male”, “woman” or “female” among many other responses. We decided to group these into 4 different categories just based on attempting to keep each category as balanced as possible, these categories were Man, Woman, Non-Binary and Other. Similarly, for race, we decided to group responses into broader racial groups such as Hispanic, White, Asian, Black or African American, or Other. This allowed us to retain a level of demographic specificity while ensuring that the category had a consistent set of values.
+In addition to incomplete entries, we also standardized key demographic columns like gender and race. Since the survey allowed for free-form text based responses, many respondents answered "man", "male", "woman" or "female" among many other responses. We decided to group these into 4 different categories just based on attempting to keep each category as balanced as possible, these categories were Man, Woman, Non-Binary and Other. Similarly, for race, we decided to group responses into broader racial groups such as Hispanic, White, Asian, Black or African American, or Other. This allowed us to retain a level of demographic specificity while ensuring that the category had a consistent set of values.
 
-After ensuring that we dropped incomplete entries and ensuring that our key categories had consistent data, the next step was to address sections with poorly written or dirty data. Since the majority of respondents in our dataset came from the United States, United Kingdom and Canada, we decided to focus our research on these three countries for a more accurate and meaningful comparison. To support this comparison, we had to standardize country names as respondents often entered country names in inconsistent formats such as US, USA or America to indicate the United States. It was important to normalize the country data to consistent values to ensure accurate grouping and filtering later on in analysis. We created a mapping of common variations as well as common misspellings of the United States into “USA”, United Kingdom into “UK” and Canada into “CANADA”. 
+After ensuring that we dropped incomplete entries and ensuring that our key categories had consistent data, the next step was to address sections with poorly written or dirty data. Since the majority of respondents in our dataset came from the United States, United Kingdom and Canada, we decided to focus our research on these three countries for a more accurate and meaningful comparison. To support this comparison, we had to standardize country names as respondents often entered country names in inconsistent formats such as US, USA or America to indicate the United States. It was important to normalize the country data to consistent values to ensure accurate grouping and filtering later on in analysis. We created a mapping of common variations as well as common misspellings of the United States into "USA", United Kingdom into "UK" and Canada into "CANADA".
 
-To complete the data cleaning process, we cleaned up the formatting of experience levels entries in the data. These entries had inconsistent formatting such as “2 - 4 years”, “2-4years”, and “1 year or less”. We standardized the way experience levels into a numerical form where it was represented as two numbers separated by a hyphen such as “2-4” to represent “2-4 years” of experience. This binning of experience values made it far easier for grouping functions later on in analysis as well as having it in numerical format allowed for further feature engineering stages that may leverage these values. With this final transformation done to the data, we performed a verification of the data, checking null values, confirming data types and doing a final check that our transformations occurred, ensuring that the data was ready for statistical analysis and modeling. 
+To complete the data cleaning process, we cleaned up the formatting of experience levels entries in the data. These entries had inconsistent formatting such as "2 - 4 years", "2-4years", and "1 year or less". We standardized the way experience levels into a numerical form where it was represented as two numbers separated by a hyphen such as "2-4" to represent "2-4 years" of experience. This binning of experience values made it far easier for grouping functions later on in analysis as well as having it in numerical format allowed for further feature engineering stages that may leverage these values. With this final transformation done to the data, we performed a verification of the data, checking null values, confirming data types and doing a final check that our transformations occurred, ensuring that the data was ready for statistical analysis and modeling.
 
 # Data Analysis
 
-Exploratory data analysis was used to visualize the distribution and impact of features. This included plots for the overall country data distribution, salary distributions within each country, and factors that influenced salary distributions within and across countries. A standard color encoding was used for the visualizations performed for each country: Green, Purple, and Orange for USA, CANADA, and UK respectively. Tools such as matplotlib, seaborn, and pandas were used for our visualizations. 
+Exploratory data analysis was used to visualize the distribution and impact of features. This included plots for the overall country data distribution, salary distributions within each country, and factors that influenced salary distributions within and across countries. A standard color encoding was used for the visualizations performed for each country: Green, Purple, and Orange for USA, CANADA, and UK respectively. Tools such as matplotlib, seaborn, and pandas were used for our visualizations.
 
-**Country-Level Distributions:**
-Plotted the amount of data available for each country to understand bias, imbalance in data, and to inform our model training process later on. With a majority of data available only in the U.S., Canada, and UK, we proceeded with our analyses on these three countries. Boxplots of annual income were plotted to understand salary distributions in each country.
+**Country-Level Distributions:** Plotted the amount of data available for each country to understand bias, imbalance in data, and to inform our model training process later on. With a majority of data available only in the U.S., Canada, and UK, we proceeded with our analyses on these three countries. Boxplots of annual income were plotted to understand salary distributions in each country.
 
-**Within-Country Comparisons:**
-We used boxplots to evaluate how salary is influenced by: Education Level, Years of Experience, Industry, Gender, and Race. 
-For U.S. respondents, we further explored state-level salary differences, identifying the top and bottom five states by median salary. The top five and bottom five states based on median salaries were analyzed to examine the differences within the United States. 
+**Within-Country Comparisons:** We used boxplots to evaluate how salary is influenced by: Education Level, Years of Experience, Industry, Gender, and Race. For U.S. respondents, we further explored state-level salary differences, identifying the top and bottom five states by median salary. The top five and bottom five states based on median salaries were analyzed to examine the differences within the United States.
 
-**Cross-country comparisons:**
-Boxplots were also used for comparison of how different features influence salary distributions across countries. To make salaries comparable across different economic systems, we used z-score salary distributions for each key factor above. Plots were grouped by education, experiences, gender, race, and industry to highlight how each factor affects salary relatively in each country. 
+```{python}
+#| echo: false
+#imports
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import numpy as np
+
+#calculating z scores
+df = pd.read_csv("cleandata.csv")
+print(df.head())
+
+#creating z-score column for salaries using groupby functions 
+df['z_salary_country'] = df.groupby('workCountry')['annualSalary'].transform(lambda x: (x - x.mean()) / x.std())
+sns.set(style="whitegrid")
+
+#creating mappings for each feature to create a compact graph
+edu_map = {
+    "Master's degree": "Grad",
+    "Professional degree (MD, JD, etc.)": "Grad",
+    "Bachelor's degree": "Undergrad",
+    "BA/BS": "Undergraduate",
+    "College degree": "Undergrad",
+    "Some college": "Some Col.",
+    "High School": "HS",
+    "PhD": "PhD"
+}
+
+exp_map = {
+    '0-1': 0.5, '2-4': 3, '5-7': 6, '8-10': 9,
+    '11-20': 15.5, '21-30': 25.5, '30+': 35
+}
+
+gender_map = {
+    "Woman": "Woman", "Man": "Man", "Non-binary": "Nonbinary",
+    "Other or prefer not to answer": "Other",
+    "Prefer not to answer": "Other"
+}
+
+race_keywords = {
+    "white": "White",
+    "asian or asian american": "Asian",
+    "another option not listed here or prefer not to answer": "Other",
+    "hispanic": "Latino",
+    "latino": "Latino",
+    "spanish origin": "Latino",
+    "black or african american": "Black"
+}
+industry_map = {
+    "Computing or Tech": "Tech",
+    "Nonprofits": "Nonprofit",
+    "Education (Higher Education)": "Higher-Ed",
+    "Health care": "Health",
+    "Government and Public Administration": "Govt"
+}
+
+#helper function to apply mappings for race, since this mappping is more complicated 
+def map_race_label(race):
+    if pd.isnull(race):
+        return "Other/NA"
+    race = race.lower()
+    for keyword, label in race_keywords.items():
+        if keyword in race:
+            return label
+    return "Other/NA"
+
+#apply mapping
+df['eduLevelShort'] = df['eduLevel'].map(edu_map).fillna(df['eduLevel'])
+df['overallExpYears'] = df['overallProExp'].map(exp_map)
+df['industryShort'] = df['industry'].map(industry_map).fillna(df['industry'])
+df['genderShort'] = df['gender'].map(gender_map).fillna(df['gender'])
+df['raceShort'] = df['race'].apply(map_race_label)
+df['raceLabel'] = df['raceShort']  
+
+
+#choose 99th percentile of salary to prevent outliers from skewing data 
+salary_cap = df['annualSalary'].quantile(0.99)
+df_clip = df[df['annualSalary'] < salary_cap].copy()
+
+#select top 5 industries
+top_industries = df_clip['industryShort'].value_counts().head(5).index
+
+#select top 5 races
+top_races = df_clip['raceShort'].value_counts().head(5).index
+
+
+#creating standard font styles, colors for graphs   
+TITLE_FONT = 16
+LABEL_FONT = 15
+TICK_FONT = 15
+colors = plt.cm.Accent.colors
+color_map = {'USA': colors[0], 'CANADA': colors[1], 'UK': colors[2]}
+
+# orders for consistent graphing
+edu_order = ["HS", "Some Col.", "Undergrad", "Grad", "PhD"]
+gender_order = ["Woman", "Man", "Nonbinary", "Other"]
+race_order = ["White", "Asian", "Latino", "Black", "Other"]
+industry_order = ["Tech", "Nonprofit", "Higher-Ed", "Health", "Govt"]
+
+# Create a single figure with subplots for each country
+fig, axes = plt.subplots(3, 1, figsize=(18, 36))  # 3 rows, 1 column
+
+#creating a plot for each country using for loops
+for ax, country in zip(axes, ['USA', 'CANADA', 'UK']):
+    
+    df_country = df_clip[df_clip['workCountry'] == country].copy()
+    #binning 
+    df_country['exp_bin'] = pd.cut(df_country['overallExpYears'], bins=[0, 5, 10, 15, 20, 30, 50])
+
+    df_industry = df_country[df_country['industryShort'].isin(top_industries)]
+    df_race = df_country[df_country['raceShort'].isin(top_races)]
+
+    ax.set_title(f"{country}: Annual Salary by Key Factors", fontsize=20, fontweight='bold')
+
+    plots = [
+        ("eduLevelShort", df_country, "By Education", " "),
+        ("exp_bin", df_country, "By Experience", " "),
+        ("industryShort", df_industry, "By Industry (Top 5)", " "),
+        ("genderShort", df_country, "By Gender", " "),
+        ("raceLabel", df_race, "By Race (Top 5)", " ")
+    ]
+
+    #  plotting loop:
+    for x_var, data, title, xlabel in plots:
+        if x_var == "eduLevelShort":
+            order = edu_order
+        elif x_var == "genderShort":
+            order = gender_order
+        elif x_var == "raceLabel":
+            order = race_order
+        elif x_var == "industryShort":
+            order = industry_order
+        else:
+            order = None  #for experience binning
+
+        sns.boxplot(data=data, x=x_var, y='annualSalary', color=color_map[country], ax=ax, order=order)
+
+        ax.set_title(title, fontsize=TITLE_FONT, fontweight='bold')
+
+        ax.set_xlabel(xlabel, fontsize=LABEL_FONT)  
+        ax.set_ylabel("Annual Salary", fontsize=LABEL_FONT)
+        ax.tick_params(axis='x', labelsize=TICK_FONT, rotation=90)
+        ax.tick_params(axis='y', labelsize=TICK_FONT)
+
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
+```
+
+**Cross-country comparisons:** Boxplots were also used for comparison of how different features influence salary distributions across countries. To make salaries comparable across different economic systems, we used z-score salary distributions for each key factor above. Plots were grouped by education, experiences, gender, race, and industry to highlight how each factor affects salary relatively in each country.
+
+```{python}
+# set up color palette for consistent coloring
+colors = plt.cm.Accent.colors
+palette = {'USA': colors[0], 'CANADA': colors[1], 'UK': colors[2]}
+
+
+# convert experience values into numeric and bin
+df_clip['overallExpYears'] = df_clip['overallProExp'].map(exp_map)
+df_clip['exp_bin'] = pd.cut(
+    df_clip['overallExpYears'],
+    bins=[0, 5, 10, 15, 20, 30, 50],
+    labels=['0–5', '6–10', '11–15', '16–20', '21–30', '30+']
+)
+
+
+order = ['USA', 'CANADA', 'UK']  # used in hue_order
+
+# plot z-score salary vs education
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_clip, x='eduLevelShort', y='z_salary_country',
+            hue='workCountry', hue_order=order, palette=palette, order=edu_order)
+plt.axhline(0, linestyle='--', color='gray')
+plt.title("Z-Score Salary by Education Level Across Countries", fontsize=TITLE_FONT, fontweight='bold')
+plt.xlabel("Education Level", fontsize=LABEL_FONT)
+plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
+plt.xticks(rotation=45, fontsize=TICK_FONT)
+plt.yticks(fontsize=TICK_FONT)
+plt.ylim(-1.5, 3)
+plt.tight_layout()
+plt.show()
+
+# plot z-score salary vs experience
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_clip, x='exp_bin', y='z_salary_country',
+            hue='workCountry', hue_order=order, palette=palette)
+plt.axhline(0, linestyle='--', color='gray')
+plt.title("Z-Score Salary by Experience Bin Across Countries", fontsize=TITLE_FONT, fontweight='bold')
+plt.xlabel("Experience (Years)", fontsize=LABEL_FONT)
+plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
+plt.xticks(fontsize=TICK_FONT)
+plt.yticks(fontsize=TICK_FONT)
+plt.ylim(-1.5, 3)
+plt.tight_layout()
+plt.show()
+
+# plot z-score salary vs industry
+df_ind = df_clip[df_clip['industryShort'].isin(top_industries)]
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_ind, x='industryShort', y='z_salary_country',
+            hue='workCountry', hue_order=order, palette=palette,
+            order=industry_order)
+plt.axhline(0, linestyle='--', color='gray')
+plt.title("Z-Score Salary by Industry (Top 5) Across Countries", fontsize=TITLE_FONT, fontweight='bold')
+plt.xlabel("Industry", fontsize=LABEL_FONT)
+plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
+plt.xticks(rotation=45, fontsize=TICK_FONT)
+plt.yticks(fontsize=TICK_FONT)
+plt.ylim(-1.5, 3)
+plt.tight_layout()
+plt.show()
+
+# plot z-score salary vs gender
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_clip, x='genderShort', y='z_salary_country',
+            hue='workCountry', hue_order=order, palette=palette, order=gender_order)
+plt.axhline(0, linestyle='--', color='gray')
+plt.title("Z-Score Salary by Gender Across Countries", fontsize=TITLE_FONT, fontweight='bold')
+plt.xlabel("Gender", fontsize=LABEL_FONT)
+plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
+plt.xticks(fontsize=TICK_FONT)
+plt.yticks(fontsize=TICK_FONT)
+plt.ylim(-1.5, 3)
+plt.tight_layout()
+plt.show()
+
+# plot z-score salary vs race
+df_race = df_clip[df_clip['raceShort'].isin(top_races)]
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df_race, x='raceShort', y='z_salary_country',
+            hue='workCountry', hue_order=order, palette=palette, order=race_order)
+plt.axhline(0, linestyle='--', color='gray')
+plt.title("Z-Score Salary by Race (Top 5) Across Countries", fontsize=TITLE_FONT, fontweight='bold')
+plt.xlabel("Race", fontsize=LABEL_FONT)
+plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
+plt.xticks(rotation=45, fontsize=TICK_FONT)
+plt.yticks(fontsize=TICK_FONT)
+plt.ylim(-1.5, 3)
+plt.tight_layout()
+plt.show()
+```
 
 # Model Description
 
 We employed a Random Forest Classifier to make predictions on the estimated salary brackets and bucket the results. We chose this model because it accommodates heterogeneous features– continuous variables, like total compensation (salary and bonuses combined) and years of experience, working alongside one-hot encoded features, like country, industry, and race– without requiring strict distributional assumptions or extensive feature scaling. Its robustness to outliers, inclination to capture nonlinear interactions and built-in estimation for variable importance align with our project statement and help us produce accurate predictions for salaries and rank the relative influence of socioeconomic and demographic variables.
 
-To quantify the relative influence of different demographic and professional features on compensation, we used a multi-class salary bracket classification. totalComp was bucketed, following the US federal tax bands by applying fixed monetary cutpoints. After categorization, we were left with approximately 25900 records spanning the three major countries. All predictors, except totalComp, were retained. Numerical features were unchanged but categorical features like country, industry, etc were converted to binary indicators using one-hot encoding, with the first level dropped to avoid collinearity.  
+To quantify the relative influence of different demographic and professional features on compensation, we used a multi-class salary bracket classification. totalComp was bucketed, following the US federal tax bands by applying fixed monetary cutpoints. After categorization, we were left with approximately 25900 records spanning the three major countries. All predictors, except totalComp, were retained. Numerical features were unchanged but categorical features like country, industry, etc were converted to binary indicators using one-hot encoding, with the first level dropped to avoid collinearity.
 
 The data was partitioned into a 80/20 training-testing split. We fitted the RandomForestClassifier from the scikit-learn library with n_estimators=16 and random_state= 42(default depth and split criteria). The forest, despite having a relatively small size, was able to converge while keeping inference latency to a minimum. No additional hyperparameter tuning was applied because the grid search did not improve validation accuracy, but that is an avenue that could be explored in the future. Model assessment used accuracy and the macro‑averaged precision, recall and F‑score as supplied by the classification_report utility.
 
 # Results
 
-**Key Insights from EDA **
-From our EDA, several clear patterns emerged. The technology industry, 20–30 years of experience, and holding a PhD were consistently associated with higher median salaries across all three countries. However, the strength of these effects varied by country. The impact of working in tech and having a PhD was more pronounced in the US, while in the UK, years of experience (particularly 21–30 years) had a stronger influence on salary. Significant gender disparities were also observed. In all three countries, women and nonbinary individuals had lower median salaries compared to men, with the gap being most prominent in the US (as shown in Figure 2).
+**Key Insights from EDA** From our EDA, several clear patterns emerged. The technology industry, 20–30 years of experience, and holding a PhD were consistently associated with higher median salaries across all three countries. However, the strength of these effects varied by country. The impact of working in tech and having a PhD was more pronounced in the US, while in the UK, years of experience (particularly 21–30 years) had a stronger influence on salary. Significant gender disparities were also observed. In all three countries, women and nonbinary individuals had lower median salaries compared to men, with the gap being most prominent in the US (as shown in Figure 2).
 
 Race also showed a notable effect: identifying as Asian was associated with higher median earnings in both the US and UK, with a stronger impact in the US. Therefore, higher salaries were more likely among Asian individuals, especially in the US context. These insights informed our modeling approach by highlighting the most predictive features for salary and emphasizing where country-specific adjustments might be necessary.
 
-**Random Forest Results**
-The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model’s macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution. 
+**Random Forest Results** The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model's macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution.
 
 The presentation finding that industry membership (particularly in the technology sector), postgraduate education, and self-identified gender exert the largest marginal effects on the predicted bracket, while the country indicator contributes relatively little once all salaries are expressed in U.S. dollars, was replicated by qualitative inspection of impurity-based feature importances. These patterns are mostly consistent with the patterns observed in the exploratory data analysis section.
 
-In summary, the random forest classifier model was able to capture the dominant trends in the cleaned dataset and its feature importance scores clearly demonstrates the important variables, preserving interpretability and giving us reliable predictions. 
+In summary, the random forest classifier model was able to capture the dominant trends in the cleaned dataset and its feature importance scores clearly demonstrates the important variables, preserving interpretability and giving us reliable predictions.
 
 # Discussion
 
@@ -84,14 +315,10 @@ Then explain how you interpret them to reach conclusions (Discussion). In many r
 
 # Conclusion
 
-Our project highlights that industry, education, and gender are the major factors influencing salary. Contrary to our expectations and our initial breakdown of our work, the country of employment had a small effect. Increasing experience does boost salary, but its effect is not as large after the threshold of 20 years is hit. For the future, we can expand our analysis to more countries and industries to improve global representation; additionally, we can also adjust for cost-of-living and job markets for our analysis and model. 
+Our project highlights that industry, education, and gender are the major factors influencing salary. Contrary to our expectations and our initial breakdown of our work, the country of employment had a small effect. Increasing experience does boost salary, but its effect is not as large after the threshold of 20 years is hit. For the future, we can expand our analysis to more countries and industries to improve global representation; additionally, we can also adjust for cost-of-living and job markets for our analysis and model.
 
 # Roles
 
-Andrew was responsible for data cleaning and performed all of the data cleaning tasks. Krupa performed some feature engineering and split up the exploratory data analysis with Ashley and looked into the salary distributions in detail. Taran and Andrew worked on the model together. All members of the team worked together for the final presentation and final report. 
+Andrew was responsible for data cleaning and performed all of the data cleaning tasks. Krupa performed some feature engineering and split up the exploratory data analysis with Ashley and looked into the salary distributions in detail. Taran and Andrew worked on the model together. All members of the team worked together for the final presentation and final report.
 
 # References
-
-
-
-
