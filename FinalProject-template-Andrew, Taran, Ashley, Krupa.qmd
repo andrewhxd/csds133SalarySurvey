@@ -311,7 +311,11 @@ In summary, the random forest classifier model was able to capture the dominant 
 
 # Discussion
 
-Then explain how you interpret them to reach conclusions (Discussion). In many reports/papers Results and Discussion are in separate sections. You want to be able to separate what is a result and then here weave together the "why" so how do the results and the introduction fit together. Again, you can use enumeration/itemization as needed. The Discussion section should be 1-2 pages long.
+Our model results and data analysis reinforce the idea that industry and education level are the most important influences on higher salaries. Gender differences in salary also were significant, which exhibits the everlasting gender wage gap. Interestingly, the impact of location was minimal in our model once industry and education were accounted for. This suggests that global shifts in remote work and skill-based pay are changing salary structures!
+
+However, there are certain limitations to our research. Because the data survey was self-reported, there may be bias in salary information or demographic accuracy. Additionally, the overwhelming number of responses from the US limits how much we can generalize our findings to other parts of the world. Nevertheless, the consistency of our evaluation across the three countries we analyzed shows that it may be okay to generalize these results because they are similar across the US, UK, and Canada. 
+
+Nevertheless, the consistency of model rankings across the three countries we analysed suggests our central message is robust. Industry and education dominate, gender differentials persist, and geography matters lesser and lesser once pay is converted to a common currency. Future work could (i) supplement self‑reports with verified compensation databases, (ii) oversample regions outside North America and the UK, (iii) incorporate cost‑of‑living or purchasing‑power adjustments, and (iv) apply explainable‑AI tools such as SHAP values to probe whether feature effects vary within remote‑only subsamples. Such extensions would sharpen our understanding of how the evolving mix of remote work, skills‑based hiring, and demographic factors is reshaping the global salary landscape.
 
 # Conclusion
 
