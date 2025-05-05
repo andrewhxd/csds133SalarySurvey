@@ -21,7 +21,7 @@ Our research provided us with new insights: being in the tech industry, having a
 
 # Methods
 
-Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1. ![Figure 1](https://drive.google.com/file/d/1Dr7B766tN8l9gZ00ZU_TbFoM-JFCzYuy/view?usp=sharing)
+Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1. ![Figure 1](/Users/andrewxue/Desktop/csds133SalarySurvey/finalProjectFiles/projectFlow.png)
 
 # Data Cleaning
 
@@ -334,8 +334,6 @@ print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
 df = df.dropna(subset=['SalaryCategory'])
 
 print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
-
-
 ```
 
 The data was partitioned into a 80/20 training-testing split. We fitted the RandomForestClassifier from the scikit-learn library with n_estimators=16 and random_state= 42(default depth and split criteria). The forest, despite having a relatively small size, was able to converge while keeping inference latency to a minimum. No additional hyperparameter tuning was applied because the grid search did not improve validation accuracy, but that is an avenue that could be explored in the future. Model assessment used accuracy and the macro‑averaged precision, recall and F‑score as supplied by the classification_report utility.
@@ -349,7 +347,6 @@ Race also showed a notable effect: identifying as Asian was associated with high
 **Random Forest Results** The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model's macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution.
 
 ```{python}
-{python}
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
@@ -395,7 +392,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 
 clf = RandomForestClassifier(
-    n_estimators=1200,
+    n_estimators=120,
     random_state=42,
     max_depth=100,
 )
