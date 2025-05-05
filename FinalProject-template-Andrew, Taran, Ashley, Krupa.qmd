@@ -22,13 +22,59 @@ Our research provided us with new insights: being in the tech industry, having a
 
 # Methods
 
-Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1.
+Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1, where we started with data cleaning, moved onto feature engineering, data analysis, model training and then evaluating the models performance and whether it alines with any observations made during data analysis. ![Figure 1](/finalProjectFiles/projectFlow.png){width=70% fig-align="center"} 
+\begin{center}
+[Figure 1, Project Workflow Diagram]
+\end{center}
 
 # Data Cleaning
 
 Surveys are a great method of data collection however they often suffer from issues due to free response answers and incomplete answers. These unconstrained answers and null values complicate our ability to use this data to make predictions or identify patterns in the data and thus a level of data cleaning is required before performing any further analysis on this data.
 
-Our first steps were to ensure consistency throughout the data where we performed several preprocessing steps aimed at ensuring standardization of values to prepare for data analysis. This started with consolidating compensation data into a single value where we combined bonuses and base pay all into one new column named total compensation. Additionally, as compensation was reported in each respondents corresponding national currency, we created a new column which was the respondents total compensation normalized into USD using current exchange rates.
+Our first steps were to ensure consistency throughout the data where we performed several preprocessing steps aimed at ensuring standardization of values to prepare for data analysis. This started with consolidating compensation data into a single value where we combined bonuses and base pay all into one new column named total compensation as can be seen below in Figure 2. We first check for null values as well as ensuring type safety to ensure the safe addition of the two columns. We then performe the addition and check if it was performed by printing the first few values of the dataset. Additionally, as compensation was reported in each respondents corresponding national currency, we created a new column which was the respondents total compensation normalized into USD using current exchange rates.
+
+```{python}
+import pandas as pd
+
+# read csv file
+df = pd.read_csv('salarySurveyRenamed.csv')
+print("=" * 50)
+# check for nulls and fill if needed
+print("NaNs in salary: ", df["annualSalary"].isna().sum())
+print("NaNs in Additional Income: ",df["addIncome"].isna().sum())
+
+# fill the NaNs in additional income with 0 so I can correctly calculate total compensation
+df["addIncome"] = df["addIncome"].fillna(0)
+print(df["addIncome"].head(5))
+
+# check types
+df.dtypes[["annualSalary", "addIncome"]]
+
+# convert annualSalary to type float and remove commas
+df["annualSalary"] = pd.to_numeric(df["annualSalary"].astype(str).str.replace(",", ""), errors="coerce")
+print(df["annualSalary"].head(5))
+
+# now calculate for total income
+df["totalCompensation"] = df["annualSalary"] + df["addIncome"]
+print(df["totalCompensation"].head(5))
+
+
+# we have to standardize all values to USD
+# combine currency and otherCurrency
+df["currency"] = df["currency"].fillna(df["otherCurrency"])
+
+# drop otherCurrency
+df = df.drop(columns=["otherCurrency"])
+
+# find unique currencies to create dictionary for conversion
+df["currency"] = df["currency"].str.strip().str.upper()
+unique_currencies = df["currency"].dropna().unique()
+print("=" * 50)
+```
+
+\begin{center}
+[Figure 2, Total Compensation Creation from Salary and Bonus]
+\end{center}
 
 Next, we decided to remove extraneous columns and data automatically provided by google surveys that didn't match the context of our analysis or provided hard to classify data. This culminated in the removal of the timestamp column, job context and job title columns. The timestamp column just provided the time the form was submitted which provided little to no discernable data in regards to the person submitting. The job context and the job title columns did provide useful information, however, the responses in these columns were often incredibly verbose and provided far too much detail in regards to the respondents job description to the point it was far easier to group professions based on the industry column rather than attempting to bucket job titles or job context responses into a feasible number of classifications.
 
@@ -44,21 +90,23 @@ To complete the data cleaning process, we cleaned up the formatting of experienc
 
 Exploratory data analysis was used to visualize the distribution and impact of features. This included plots for the overall country data distribution, salary distributions within each country, and factors that influenced salary distributions within and across countries. A standard color encoding was used for the visualizations performed for each country: Green, Purple, and Orange for USA, CANADA, and UK respectively. Tools such as matplotlib, seaborn, and pandas were used for our visualizations.
 
-**Country-Level Distributions:** Plotted the amount of data available for each country to understand bias, imbalance in data, and to inform our model training process later on. With a majority of data available only in the U.S., Canada, and UK, we proceeded with our analyses on these three countries. Boxplots of annual income were plotted to understand salary distributions in each country.
+**Country-Level Distributions:**\
+Plotted the amount of data available for each country to understand bias, imbalance in data, and to inform our model training process later on. With a majority of data available only in the U.S., Canada, and UK, we proceeded with our analyses on these three countries. Boxplots of annual income were plotted to understand salary distributions in each country.
 
-**Within-Country Comparisons:** We used boxplots to evaluate how salary is influenced by: Education Level, Years of Experience, Industry, Gender, and Race. For U.S. respondents, we further explored state-level salary differences, identifying the top and bottom five states by median salary. The top five and bottom five states based on median salaries were analyzed to examine the differences within the United States.
+**Within-Country Comparisons:**\
+We used boxplots to evaluate how salary is influenced by: Education Level, Years of Experience, Industry, Gender, and Race. For U.S. respondents, we further explored state-level salary differences, identifying the top and bottom five states by median salary. The top five and bottom five states based on median salaries were analyzed to examine the differences within the United States.
 
 ```{python}
 #| echo: false
 #imports
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import seaborn as sns
 import pandas as pd
 import numpy as np
 
 #calculating z scores
 df = pd.read_csv("cleandata.csv")
-print(df.head())
 
 #creating z-score column for salaries using groupby functions 
 df['z_salary_country'] = df.groupby('workCountry')['annualSalary'].transform(lambda x: (x - x.mean()) / x.std())
@@ -133,72 +181,101 @@ top_industries = df_clip['industryShort'].value_counts().head(5).index
 #select top 5 races
 top_races = df_clip['raceShort'].value_counts().head(5).index
 
-
-#creating standard font styles, colors for graphs   
-TITLE_FONT = 16
-LABEL_FONT = 15
-TICK_FONT = 15
-colors = plt.cm.Accent.colors
-color_map = {'USA': colors[0], 'CANADA': colors[1], 'UK': colors[2]}
-
 # orders for consistent graphing
 edu_order = ["HS", "Some Col.", "Undergrad", "Grad", "PhD"]
 gender_order = ["Woman", "Man", "Nonbinary", "Other"]
 race_order = ["White", "Asian", "Latino", "Black", "Other"]
 industry_order = ["Tech", "Nonprofit", "Higher-Ed", "Health", "Govt"]
 
-# Create a single figure with subplots for each country
-fig, axes = plt.subplots(3, 1, figsize=(18, 36))  # 3 rows, 1 column
+fig, axes = plt.subplots(3, 5, figsize=(20, 18))  # 3 countries × (up to 5 plots each)
+colors = plt.cm.Accent.colors
+color_map = {'USA': colors[0], 'CANADA': colors[1], 'UK': colors[2]}
+countries = ['USA', 'CANADA', 'UK']
 
-#creating a plot for each country using for loops
-for ax, country in zip(axes, ['USA', 'CANADA', 'UK']):
-    
+TITLE_FONT = 16
+LABEL_FONT = 15
+TICK_FONT = 15
+
+plots = [
+    ("eduLevelShort", "By Education", edu_order),
+    ("exp_bin", "By Experience", None),
+    ("industryShort", "By Industry (Top 5)", industry_order),
+    ("genderShort", "By Gender", gender_order),
+    ("raceLabel", "By Race (Top 5)", race_order)
+]
+
+for row, country in enumerate(countries):
     df_country = df_clip[df_clip['workCountry'] == country].copy()
-    #binning 
     df_country['exp_bin'] = pd.cut(df_country['overallExpYears'], bins=[0, 5, 10, 15, 20, 30, 50])
-
     df_industry = df_country[df_country['industryShort'].isin(top_industries)]
     df_race = df_country[df_country['raceShort'].isin(top_races)]
 
-    ax.set_title(f"{country}: Annual Salary by Key Factors", fontsize=20, fontweight='bold')
+    data_sources = {
+        "eduLevelShort": df_country,
+        "exp_bin": df_country,
+        "industryShort": df_industry,
+        "genderShort": df_country,
+        "raceLabel": df_race
+    }
 
-    plots = [
-        ("eduLevelShort", df_country, "By Education", " "),
-        ("exp_bin", df_country, "By Experience", " "),
-        ("industryShort", df_industry, "By Industry (Top 5)", " "),
-        ("genderShort", df_country, "By Gender", " "),
-        ("raceLabel", df_race, "By Race (Top 5)", " ")
-    ]
+    for col in range(5):  # Only use first 5 plots per country (or modify if you want 5 each)
+        x_var, title, order = plots[col]
+        ax = axes[row, col]
+        data = data_sources[x_var]
 
-    #  plotting loop:
-    for x_var, data, title, xlabel in plots:
-        if x_var == "eduLevelShort":
-            order = edu_order
-        elif x_var == "genderShort":
-            order = gender_order
-        elif x_var == "raceLabel":
-            order = race_order
-        elif x_var == "industryShort":
-            order = industry_order
-        else:
-            order = None  #for experience binning
+        sns.boxplot(data=data, x=x_var, y='annualSalary',
+                    color=color_map[country], ax=ax, order=order)
 
-        sns.boxplot(data=data, x=x_var, y='annualSalary', color=color_map[country], ax=ax, order=order)
-
-        ax.set_title(title, fontsize=TITLE_FONT, fontweight='bold')
-
-        ax.set_xlabel(xlabel, fontsize=LABEL_FONT)  
+        ax.set_title(f"{country} - {title}", fontsize=TITLE_FONT, fontweight='bold')
+        ax.set_xlabel(x_var, fontsize=LABEL_FONT)
         ax.set_ylabel("Annual Salary", fontsize=LABEL_FONT)
         ax.tick_params(axis='x', labelsize=TICK_FONT, rotation=90)
         ax.tick_params(axis='y', labelsize=TICK_FONT)
 
-plt.tight_layout(rect=[0, 0, 1, 0.95])
+# Layout fix
+plt.tight_layout()
+
+# Bounding box coordinates (after layout)
+bbox = axes[0, 0].get_position()
+xmin, ymin = bbox.x0, bbox.y0
+xmax, ymax = bbox.x1, bbox.y1
+
+for i in range(3):
+    for j in range(5):
+        box = axes[i, j].get_position()
+        xmin = min(xmin, box.x0)
+        ymin = min(ymin, box.y0)
+        xmax = max(xmax, box.x1)
+        ymax = max(ymax, box.y1)
+
+# Draw the bounding box
+rect = patches.Rectangle(
+    (xmin, ymin), xmax - xmin, ymax - ymin,
+    linewidth=3, edgecolor='black', facecolor='none',
+    transform=fig.transFigure
+)
+fig.patches.append(rect)
+
 plt.show()
 ```
 
-**Cross-country comparisons:** Boxplots were also used for comparison of how different features influence salary distributions across countries. To make salaries comparable across different economic systems, we used z-score salary distributions for each key factor above. Plots were grouped by education, experiences, gender, race, and industry to highlight how each factor affects salary relatively in each country.
+\begin{center}
+[Figure 3, Within Country Comparisons of how Salary is Influenced by 5 Features]
+\end{center}
+
+**Cross-country comparisons:**\
+Boxplots were also used for comparison of how different features influence salary distributions across countries. To make salaries comparable across different economic systems, we used z-score salary distributions for each key factor above. Plots were grouped by education, experiences, gender, race, and industry to highlight how each factor affects salary relatively in each country.
 
 ```{python}
+import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.patches as patches
+
+fig, axes = plt.subplots(2, 3, figsize=(20, 12))  # 2 rows x 3 columns
+
+# Flatten axes array for easier indexing
+axes = axes.flatten()
+
 # set up color palette for consistent coloring
 colors = plt.cm.Accent.colors
 palette = {'USA': colors[0], 'CANADA': colors[1], 'UK': colors[2]}
@@ -215,85 +292,82 @@ df_clip['exp_bin'] = pd.cut(
 
 order = ['USA', 'CANADA', 'UK']  # used in hue_order
 
-# plot z-score salary vs education
-plt.figure(figsize=(10, 6))
+# --- 1. Education ---
 sns.boxplot(data=df_clip, x='eduLevelShort', y='z_salary_country',
-            hue='workCountry', hue_order=order, palette=palette, order=edu_order)
-plt.axhline(0, linestyle='--', color='gray')
-plt.title("Z-Score Salary by Education Level Across Countries", fontsize=TITLE_FONT, fontweight='bold')
-plt.xlabel("Education Level", fontsize=LABEL_FONT)
-plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
-plt.xticks(rotation=45, fontsize=TICK_FONT)
-plt.yticks(fontsize=TICK_FONT)
-plt.ylim(-1.5, 3)
-plt.tight_layout()
-plt.show()
+            hue='workCountry', hue_order=order, palette=palette,
+            order=edu_order, ax=axes[0])
+axes[0].axhline(0, linestyle='--', color='gray')
+axes[0].set_title("Z-Score Salary by Education Level")
+axes[0].tick_params(axis='x', rotation=45)
 
-# plot z-score salary vs experience
-plt.figure(figsize=(10, 6))
+# --- 2. Experience ---
 sns.boxplot(data=df_clip, x='exp_bin', y='z_salary_country',
-            hue='workCountry', hue_order=order, palette=palette)
-plt.axhline(0, linestyle='--', color='gray')
-plt.title("Z-Score Salary by Experience Bin Across Countries", fontsize=TITLE_FONT, fontweight='bold')
-plt.xlabel("Experience (Years)", fontsize=LABEL_FONT)
-plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
-plt.xticks(fontsize=TICK_FONT)
-plt.yticks(fontsize=TICK_FONT)
-plt.ylim(-1.5, 3)
-plt.tight_layout()
-plt.show()
+            hue='workCountry', hue_order=order, palette=palette, ax=axes[1])
+axes[1].axhline(0, linestyle='--', color='gray')
+axes[1].set_title("Z-Score Salary by Experience")
 
-# plot z-score salary vs industry
+# --- 3. Industry ---
 df_ind = df_clip[df_clip['industryShort'].isin(top_industries)]
-plt.figure(figsize=(10, 6))
 sns.boxplot(data=df_ind, x='industryShort', y='z_salary_country',
             hue='workCountry', hue_order=order, palette=palette,
-            order=industry_order)
-plt.axhline(0, linestyle='--', color='gray')
-plt.title("Z-Score Salary by Industry (Top 5) Across Countries", fontsize=TITLE_FONT, fontweight='bold')
-plt.xlabel("Industry", fontsize=LABEL_FONT)
-plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
-plt.xticks(rotation=45, fontsize=TICK_FONT)
-plt.yticks(fontsize=TICK_FONT)
-plt.ylim(-1.5, 3)
-plt.tight_layout()
-plt.show()
+            order=industry_order, ax=axes[2])
+axes[2].axhline(0, linestyle='--', color='gray')
+axes[2].set_title("Z-Score Salary by Industry (Top 5)")
+axes[2].tick_params(axis='x', rotation=45)
 
-# plot z-score salary vs gender
-plt.figure(figsize=(10, 6))
+# --- 4. Gender ---
 sns.boxplot(data=df_clip, x='genderShort', y='z_salary_country',
-            hue='workCountry', hue_order=order, palette=palette, order=gender_order)
-plt.axhline(0, linestyle='--', color='gray')
-plt.title("Z-Score Salary by Gender Across Countries", fontsize=TITLE_FONT, fontweight='bold')
-plt.xlabel("Gender", fontsize=LABEL_FONT)
-plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
-plt.xticks(fontsize=TICK_FONT)
-plt.yticks(fontsize=TICK_FONT)
-plt.ylim(-1.5, 3)
-plt.tight_layout()
-plt.show()
+            hue='workCountry', hue_order=order, palette=palette,
+            order=gender_order, ax=axes[3])
+axes[3].axhline(0, linestyle='--', color='gray')
+axes[3].set_title("Z-Score Salary by Gender")
 
-# plot z-score salary vs race
+# --- 5. Race ---
 df_race = df_clip[df_clip['raceShort'].isin(top_races)]
-plt.figure(figsize=(10, 6))
 sns.boxplot(data=df_race, x='raceShort', y='z_salary_country',
-            hue='workCountry', hue_order=order, palette=palette, order=race_order)
-plt.axhline(0, linestyle='--', color='gray')
-plt.title("Z-Score Salary by Race (Top 5) Across Countries", fontsize=TITLE_FONT, fontweight='bold')
-plt.xlabel("Race", fontsize=LABEL_FONT)
-plt.ylabel("Z-Score Salary", fontsize=LABEL_FONT)
-plt.xticks(rotation=45, fontsize=TICK_FONT)
-plt.yticks(fontsize=TICK_FONT)
-plt.ylim(-1.5, 3)
+            hue='workCountry', hue_order=order, palette=palette,
+            order=race_order, ax=axes[4])
+axes[4].axhline(0, linestyle='--', color='gray')
+axes[4].set_title("Z-Score Salary by Race (Top 5)")
+axes[4].tick_params(axis='x', rotation=45)
+
+# --- 6. Empty panel ---
+axes[5].axis('off')  # Hide the unused 6th subplot
+
+# Adjust layout first
 plt.tight_layout()
+
+# Now get bounding box coordinates AFTER layout is finalized
+bbox = axes[0].get_position()
+xmin, ymin = bbox.x0, bbox.y0
+xmax, ymax = bbox.x1, bbox.y1
+
+for i in range(1, 5):  # Only first 5 axes
+    bbox = axes[i].get_position()
+    xmin = min(xmin, bbox.x0)
+    ymin = min(ymin, bbox.y0)
+    xmax = max(xmax, bbox.x1)
+    ymax = max(ymax, bbox.y1)
+
+# Draw the bounding rectangle with updated layout coordinates
+rect = patches.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+                         transform=fig.transFigure,
+                         linewidth=2, edgecolor='black', facecolor='none')
+fig.patches.append(rect)
+
+# Show the plot
 plt.show()
 ```
+
+\begin{center}
+[Figure 4, Cross Country Comparisons of Z-Score Salary Distributions]
+\end{center}
 
 # Model Description
 
 We employed a Random Forest Classifier to make predictions on the estimated salary brackets and bucket the results. We chose this model because it accommodates heterogeneous features– continuous variables, like total compensation (salary and bonuses combined) and years of experience, working alongside one-hot encoded features, like country, industry, and race– without requiring strict distributional assumptions or extensive feature scaling. Its robustness to outliers, inclination to capture nonlinear interactions and built-in estimation for variable importance align with our project statement and help us produce accurate predictions for salaries and rank the relative influence of socioeconomic and demographic variables.
 
-To quantify the relative influence of different demographic and professional features on compensation, we used a multi-class salary bracket classification. totalComp was bucketed, following the US federal tax bands by applying fixed monetary cutpoints. After categorization, we were left with approximately 25900 records spanning the three major countries. All predictors, except totalComp, were retained. Numerical features were unchanged but categorical features like country, industry, etc were converted to binary indicators using one-hot encoding, with the first level dropped to avoid collinearity.
+To quantify the relative influence of different demographic and professional features on compensation, we used a multi-class salary bracket classification. totalComp was bucketed, following the US federal tax bands by applying fixed monetary cutpoints. After categorization, we were left with approximately 25900 records spanning the three major countries. All predictors, except totalComp, were retained. Numerical features were unchanged but categorical features like country, industry, etc were converted to binary indicators using one-hot encoding, with the first level dropped to avoid collinearity. In Figure 5 below, we notice the bins created for the random forest classifier to predict peoples salarys into based on the features provided in the dataset. These bins were defined by tax brackets as to be more applicable to the real world.
 
 ```{python}
 import pandas as pd
@@ -318,23 +392,28 @@ labels = [
 
 # Apply the cut
 df['SalaryCategory'] = pd.cut(df['compUSD'], bins=bins, labels=labels)
-
+print("=" * 50)
 # View counts per category
 print(df['SalaryCategory'].value_counts())
 print(df[['compUSD', 'SalaryCategory']].head())
-
-
+print("=" * 50)
 ```
+
+\begin{center}
+[Figure 5, Salary Bins for RandomForest Classifier]
+\end{center}
 
 The data was partitioned into a 80/20 training-testing split. We fitted the RandomForestClassifier from the scikit-learn library with n_estimators=16 and random_state= 42(default depth and split criteria). The forest, despite having a relatively small size, was able to converge while keeping inference latency to a minimum. No additional hyperparameter tuning was applied because the grid search did not improve validation accuracy, but that is an avenue that could be explored in the future. Model assessment used accuracy and the macro‑averaged precision, recall and F‑score as supplied by the classification_report utility.
 
 # Results
 
-**Key Insights from EDA** From our EDA, several clear patterns emerged. The technology industry, 20–30 years of experience, and holding a PhD were consistently associated with higher median salaries across all three countries. However, the strength of these effects varied by country. The impact of working in tech and having a PhD was more pronounced in the US, while in the UK, years of experience (particularly 21–30 years) had a stronger influence on salary. Significant gender disparities were also observed. In all three countries, women and nonbinary individuals had lower median salaries compared to men, with the gap being most prominent in the US (as shown in Figure 2).
+**Key Insights from EDA**\
+From our EDA, several clear patterns emerged. The technology industry, 20–30 years of experience, and holding a PhD were consistently associated with higher median salaries across all three countries. However, the strength of these effects varied by country. The impact of working in tech and having a PhD was more pronounced in the US, while in the UK, years of experience (particularly 21–30 years) had a stronger influence on salary. Significant gender disparities were also observed. In all three countries, women and nonbinary individuals had lower median salaries compared to men, with the gap being most prominent in the US (as shown in Figure 3).
 
 Race also showed a notable effect: identifying as Asian was associated with higher median earnings in both the US and UK, with a stronger impact in the US. Therefore, higher salaries were more likely among Asian individuals, especially in the US context. These insights informed our modeling approach by highlighting the most predictive features for salary and emphasizing where country-specific adjustments might be necessary.
 
-**Random Forest Results** The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model's macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution.
+**Random Forest Results**\
+The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model's macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution. We can see a more in-depth classification report below in Figure 6 as produced by sklearn metrics.
 
 ```{python}
 import pandas as pd
@@ -390,7 +469,10 @@ clf.fit(X_train, y_train)
 
 # Predict and evaluate
 y_pred = clf.predict(X_test)
+print("=" * 50)
 print(classification_report(y_test, y_pred))
+print("[Figure 6, Random Forest Prediction Results]")
+print("=" * 50)
 
 # Get feature importances
 importances = clf.feature_importances_
@@ -414,6 +496,10 @@ plt.title(f'Top {top_n} Feature Importances')
 plt.tight_layout()
 plt.show()
 ```
+
+\begin{center}
+[Figure 7, Most Important Features on Classification as indicated by Tree]
+\end{center}
 
 The presentation finding that industry membership (particularly in the technology sector), postgraduate education, and self-identified gender exert the largest marginal effects on the predicted bracket, while the country indicator contributes relatively little once all salaries are expressed in U.S. dollars, was replicated by qualitative inspection of impurity-based feature importances. These patterns are mostly consistent with the patterns observed in the exploratory data analysis section.
 
