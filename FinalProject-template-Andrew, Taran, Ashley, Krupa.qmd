@@ -323,18 +323,7 @@ df['SalaryCategory'] = pd.cut(df['compUSD'], bins=bins, labels=labels)
 print(df['SalaryCategory'].value_counts())
 print(df[['compUSD', 'SalaryCategory']].head())
 
-print(df.dtypes)
-print(df["overallProExp"].unique())
 
-# group other response
-print(df["gender"].unique())
-print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
-
-
-# Drop rows where salary category couldn't be assigned (NaN)
-df = df.dropna(subset=['SalaryCategory'])
-
-print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
 ```
 
 The data was partitioned into a 80/20 training-testing split. We fitted the RandomForestClassifier from the scikit-learn library with n_estimators=16 and random_state= 42(default depth and split criteria). The forest, despite having a relatively small size, was able to converge while keeping inference latency to a minimum. No additional hyperparameter tuning was applied because the grid search did not improve validation accuracy, but that is an avenue that could be explored in the future. Model assessment used accuracy and the macro‑averaged precision, recall and F‑score as supplied by the classification_report utility.
@@ -402,13 +391,6 @@ clf.fit(X_train, y_train)
 # Predict and evaluate
 y_pred = clf.predict(X_test)
 print(classification_report(y_test, y_pred))
-
-
-
-plt.figure(figsize=(20, 10))
-plot_tree(clf.estimators_[0], feature_names=X.columns, class_names=clf.classes_, filled=True, max_depth=7)
-plt.title("Random Forest Classification Tree (Limited Depth)")
-plt.show()
 
 # Get feature importances
 importances = clf.feature_importances_
