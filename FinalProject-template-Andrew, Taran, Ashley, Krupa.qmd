@@ -1,7 +1,9 @@
 ---
 title: "Predicting Salary from Demographics and Professional Experience"
 subtitle: "Andrew, Taran, Ashley, and Krupa"
-format: pdf
+format: 
+    pdf:
+        echo: false
 bibliography: FinalProjectReferences.bib
 editor: visual
 ---
@@ -20,7 +22,7 @@ Our research provided us with new insights: being in the tech industry, having a
 
 # Methods
 
-Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1. ![Figure 1](/Users/andrewxue/Desktop/csds133SalarySurvey/finalProjectFiles/projectFlow.png)
+Our project's data comes from an online Google Forms survey that was open worldwide on AskAManager.org's website. The dataset has 17 variables; the quantitative variables were the base salary, bonus income, and years of experience. The categorical variables were country, industry, education level, gender, and race. Six of the columns are free-response entries that were an addition to the main required questions, which we removed during our data cleaning. The dataset contains more than 27,000 individual data points. Around 26,000 data points were focused on the US, UK, and Canada. The project workflow is highlighted in Figure 1.
 
 # Data Cleaning
 
@@ -429,9 +431,6 @@ plt.xlabel('Importance')
 plt.title(f'Top {top_n} Feature Importances')
 plt.tight_layout()
 plt.show()
-
-
-
 ```
 
 The presentation finding that industry membership (particularly in the technology sector), postgraduate education, and self-identified gender exert the largest marginal effects on the predicted bracket, while the country indicator contributes relatively little once all salaries are expressed in U.S. dollars, was replicated by qualitative inspection of impurity-based feature importances. These patterns are mostly consistent with the patterns observed in the exploratory data analysis section.
