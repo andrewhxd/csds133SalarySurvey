@@ -5,7 +5,6 @@ format: pdf
 bibliography: FinalProjectReferences.bib
 csl: ieee.csl
 editor: visual
-engine: knitr
 ---
 
 # Abstract
@@ -295,6 +294,50 @@ We employed a Random Forest Classifier to make predictions on the estimated sala
 
 To quantify the relative influence of different demographic and professional features on compensation, we used a multi-class salary bracket classification. totalComp was bucketed, following the US federal tax bands by applying fixed monetary cutpoints. After categorization, we were left with approximately 25900 records spanning the three major countries. All predictors, except totalComp, were retained. Numerical features were unchanged but categorical features like country, industry, etc were converted to binary indicators using one-hot encoding, with the first level dropped to avoid collinearity.
 
+```{python}
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+
+df = pd.read_csv('cleandata.csv')
+
+# Define bins and labels with ranges attached
+bins = [0, 11000, 44725, 95375, 182100, 231250, float('inf')]
+labels = [
+    'Low (0–11k)',
+    'Lower Middle (11k–44.7k)',
+    'Middle (44.7k–95.3k)',
+    'Upper Middle (95.3k–182.1k)',
+    'High (182.1k–231.2k)',
+    'Very High (231.2k+)'
+]
+
+# Apply the cut
+df['SalaryCategory'] = pd.cut(df['compUSD'], bins=bins, labels=labels)
+
+# View counts per category
+print(df['SalaryCategory'].value_counts())
+print(df[['compUSD', 'SalaryCategory']].head())
+
+print(df.dtypes)
+print(df["overallProExp"].unique())
+
+# group other response
+print(df["gender"].unique())
+print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
+
+
+# Drop rows where salary category couldn't be assigned (NaN)
+df = df.dropna(subset=['SalaryCategory'])
+
+print("NaNs in SalaryCat: ", df["SalaryCategory"].isna().sum())
+
+
+```
+
 The data was partitioned into a 80/20 training-testing split. We fitted the RandomForestClassifier from the scikit-learn library with n_estimators=16 and random_state= 42(default depth and split criteria). The forest, despite having a relatively small size, was able to converge while keeping inference latency to a minimum. No additional hyperparameter tuning was applied because the grid search did not improve validation accuracy, but that is an avenue that could be explored in the future. Model assessment used accuracy and the macro‑averaged precision, recall and F‑score as supplied by the classification_report utility.
 
 # Results
@@ -305,6 +348,96 @@ Race also showed a notable effect: identifying as Asian was associated with high
 
 **Random Forest Results** The forest achieved an overall accuracy of 0.88 on the test set and a weighted F-score of 0.86. Performance was heterogeneous across all salary bands: majority data was collected from the middle class, which led to the model classifying that part of the data almost perfectly, but the minority low class was rarely recovered, leading to negligible precision and recall. Despite this problem, the model's macro average F-score is acceptable for descriptive purposes proving that our chosen feature set contains more than enough signal to categorize the broad compensation distribution.
 
+```{python}
+{python}
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+from sklearn.tree import plot_tree
+
+df = pd.read_csv('cleandata.csv')
+
+# Define bins and labels with ranges attached
+bins = [0, 11000, 44725, 95375, 182100, 231250, float('inf')]
+labels = [
+    'Low (0–11k)',
+    'Lower Middle (11k–44.7k)',
+    'Middle (44.7k–95.3k)',
+    'Upper Middle (95.3k–182.1k)',
+    'High (182.1k–231.2k)',
+    'Very High (231.2k+)'
+]
+
+# Apply the cut
+df['SalaryCategory'] = pd.cut(df['compUSD'], bins=bins, labels=labels)
+
+
+# Drop rows where salary category couldn't be assigned (NaN)
+df = df.dropna(subset=['SalaryCategory'])
+
+
+# drop all columns associated with salary and compensation
+df.drop(columns=['annualSalary', 'addIncome'], inplace=True)
+
+# Features and target
+X = df.drop(columns=['compUSD', 'SalaryCategory'])
+y = df['SalaryCategory']
+
+# Convert categorical features to numeric
+X = pd.get_dummies(X, drop_first=True)
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=df['workCountry'])
+
+
+clf = RandomForestClassifier(
+    n_estimators=1200,
+    random_state=42,
+    max_depth=100,
+)
+clf.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = clf.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+
+
+plt.figure(figsize=(20, 10))
+plot_tree(clf.estimators_[0], feature_names=X.columns, class_names=clf.classes_, filled=True, max_depth=7)
+plt.title("Random Forest Classification Tree (Limited Depth)")
+plt.show()
+
+# Get feature importances
+importances = clf.feature_importances_
+
+# Get feature names
+feature_names = X_train.columns
+
+# Create a DataFrame for better visualization
+feature_importances = pd.DataFrame({'feature': feature_names, 'importance': importances})
+
+# Sort the DataFrame by importance
+feature_importances = feature_importances.sort_values(by='importance', ascending=False)
+
+top_n = 15  # Change to however many top features you want to display
+top_features = feature_importances.iloc[1:top_n]
+
+plt.figure(figsize=(10, 6))
+plt.barh(top_features['feature'][::-1], top_features['importance'][::-1])  # Reverse for highest on top
+plt.xlabel('Importance')
+plt.title(f'Top {top_n} Feature Importances')
+plt.tight_layout()
+plt.show()
+
+
+
+```
+
 The presentation finding that industry membership (particularly in the technology sector), postgraduate education, and self-identified gender exert the largest marginal effects on the predicted bracket, while the country indicator contributes relatively little once all salaries are expressed in U.S. dollars, was replicated by qualitative inspection of impurity-based feature importances. These patterns are mostly consistent with the patterns observed in the exploratory data analysis section.
 
 In summary, the random forest classifier model was able to capture the dominant trends in the cleaned dataset and its feature importance scores clearly demonstrates the important variables, preserving interpretability and giving us reliable predictions.
@@ -313,7 +446,7 @@ In summary, the random forest classifier model was able to capture the dominant 
 
 Our model results and data analysis reinforce the idea that industry and education level are the most important influences on higher salaries. Gender differences in salary also were significant, which exhibits the everlasting gender wage gap. Interestingly, the impact of location was minimal in our model once industry and education were accounted for. This suggests that global shifts in remote work and skill-based pay are changing salary structures!
 
-However, there are certain limitations to our research. Because the data survey was self-reported, there may be bias in salary information or demographic accuracy. Additionally, the overwhelming number of responses from the US limits how much we can generalize our findings to other parts of the world. Nevertheless, the consistency of our evaluation across the three countries we analyzed shows that it may be okay to generalize these results because they are similar across the US, UK, and Canada. 
+However, there are certain limitations to our research. Because the data survey was self-reported, there may be bias in salary information or demographic accuracy. Additionally, the overwhelming number of responses from the US limits how much we can generalize our findings to other parts of the world. Nevertheless, the consistency of our evaluation across the three countries we analyzed shows that it may be okay to generalize these results because they are similar across the US, UK, and Canada.
 
 Nevertheless, the consistency of model rankings across the three countries we analysed suggests our central message is robust. Industry and education dominate, gender differentials persist, and geography matters lesser and lesser once pay is converted to a common currency. Future work could (i) supplement self‑reports with verified compensation databases, (ii) oversample regions outside North America and the UK, (iii) incorporate cost‑of‑living or purchasing‑power adjustments, and (iv) apply explainable‑AI tools such as SHAP values to probe whether feature effects vary within remote‑only subsamples. Such extensions would sharpen our understanding of how the evolving mix of remote work, skills‑based hiring, and demographic factors is reshaping the global salary landscape.
 
